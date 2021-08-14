@@ -71,10 +71,12 @@ pipeline
 	{
 		  steps
 		  {
-			  if (branch == 'master') {
-			   	bat "docker build -t i-rohit2522-master:${BUILD_NUMBER} --no-cache -f Dockerfile ."   
-			  } else { 
-			   	bat "docker build -t i-rohit2522-develop:${BUILD_NUMBER} --no-cache -f Dockerfile ."   
+			  script {
+				  if (branch == 'master') {
+					bat "docker build -t i-rohit2522-master:${BUILD_NUMBER} --no-cache -f Dockerfile ."   
+				  } else { 
+					bat "docker build -t i-rohit2522-develop:${BUILD_NUMBER} --no-cache -f Dockerfile ."   
+				  }
 			  }
 		  }
 	}
@@ -82,30 +84,34 @@ pipeline
 		parallel{
 			stage('Precontainer Check') {
 				steps {
-					if (branch == 'master') {
-				   		bat "docker rm -f c-rohit2522-master || exit 0 && docker rm c-rohit2522-master || exit 0"
-					} else {
-						bat "docker rm -f c-rohit2522-develop || exit 0 && docker rm c-rohit2522-develop || exit 0"
+					script {
+						if (branch == 'master') {
+							bat "docker rm -f c-rohit2522-master || exit 0 && docker rm c-rohit2522-master || exit 0"
+						} else {
+							bat "docker rm -f c-rohit2522-develop || exit 0 && docker rm c-rohit2522-develop || exit 0"
+						}
 					}
 				}
 			}
 			stage('Push to Dockerhub Repo') {
 			  steps{
-				  if(branch == 'master') {
-					 bat "docker tag i-rohit2522-master:${BUILD_NUMBER} ${registry}:master-${BUILD_NUMBER}"
-					 bat "docker tag i-rohit2522-master:${BUILD_NUMBER} ${registry}:master-latest"
-					 withDockerRegistry([credentialsId: 'Test_Docker', url:""]){
-						bat "docker push ${registry}:master-${BUILD_NUMBER}"
-				 		bat "docker push ${registry}:master-latest"
-					 }
-			          } else {
-					  bat "docker tag i-rohit2522-develop:${BUILD_NUMBER} ${registry}:develop-${BUILD_NUMBER}"
-					 bat "docker tag i-rohit2522-develop:${BUILD_NUMBER} ${registry}:develop-latest"
-					 withDockerRegistry([credentialsId: 'Test_Docker', url:""]){
-						bat "docker push ${registry}:develop-${BUILD_NUMBER}"
-				 		bat "docker push ${registry}:develop-latest"
-					 }
-				   }	
+				  script {
+					  if(branch == 'master') {
+						 bat "docker tag i-rohit2522-master:${BUILD_NUMBER} ${registry}:master-${BUILD_NUMBER}"
+						 bat "docker tag i-rohit2522-master:${BUILD_NUMBER} ${registry}:master-latest"
+						 withDockerRegistry([credentialsId: 'Test_Docker', url:""]){
+							bat "docker push ${registry}:master-${BUILD_NUMBER}"
+							bat "docker push ${registry}:master-latest"
+						 }
+					  } else {
+						  bat "docker tag i-rohit2522-develop:${BUILD_NUMBER} ${registry}:develop-${BUILD_NUMBER}"
+						 bat "docker tag i-rohit2522-develop:${BUILD_NUMBER} ${registry}:develop-latest"
+						 withDockerRegistry([credentialsId: 'Test_Docker', url:""]){
+							bat "docker push ${registry}:develop-${BUILD_NUMBER}"
+							bat "docker push ${registry}:develop-latest"
+						 }
+					   }
+				  }
 						 
 							
 			}
@@ -115,10 +121,12 @@ pipeline
 	stage('Docker deployment') 
 	{            
 		 steps{
-			 if(branch === 'master') {
-			  	bat "docker run --name c-rohit2522-master -d -p 7200:8080 ${registry}:master-latest" 
-			 } else {
-			 	bat "docker run --name c-rohit2522-develop -d -p 7300:8080 ${registry}:develop-latest" 
+			 script {
+				 if(branch === 'master') {
+					bat "docker run --name c-rohit2522-master -d -p 7200:8080 ${registry}:master-latest" 
+				 } else {
+					bat "docker run --name c-rohit2522-develop -d -p 7300:8080 ${registry}:develop-latest" 
+				 }
 			 }
 		 }
 	}
