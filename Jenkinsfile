@@ -122,7 +122,7 @@ pipeline
 	{            
 		 steps{
 			 script {
-				 if(branch === 'master') {
+				 if(branch == 'master') {
 					bat "docker run --name c-rohit2522-master -d -p 7200:8080 ${registry}:master-latest" 
 				 } else {
 					bat "docker run --name c-rohit2522-develop -d -p 7300:8080 ${registry}:develop-latest" 
